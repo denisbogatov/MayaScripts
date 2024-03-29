@@ -1,0 +1,60 @@
+import maya.api.OpenMaya as om
+import maya.cmds as cmds
+
+def create_transforms_ui():
+    # Create a window
+    window_name = "transformsWindow"
+    if cmds.window(window_name, exists=True):
+        cmds.deleteUI(window_name)
+    cmds.window(window_name, title="Transforms Display", widthHeight=(300, 200))
+
+    # Create a layout
+    main_layout = cmds.columnLayout(adjustableColumn=True)
+
+    # Get the selected elements (polygons, edges, vertices)
+    selected_elements = cmds.ls(selection=True, flatten=True)
+    if not selected_elements:
+        cmds.warning("Please select elements (polygons, edges, vertices).")
+        return
+
+    # Create labels for translate, rotate, and scale attributes
+    cmds.text(label="Translate:")
+    translate_x_label = cmds.text(label="X: 0.00")
+    translate_y_label = cmds.text(label="Y: 0.00")
+    translate_z_label = cmds.text(label="Z: 0.00")
+
+    cmds.text(label="Rotate:")
+    rotate_x_label = cmds.text(label="X: 0.00")
+    rotate_y_label = cmds.text(label="Y: 0.00")
+    rotate_z_label = cmds.text(label="Z: 0.00")
+
+    cmds.text(label="Scale:")
+    scale_x_label = cmds.text(label="X: 1.00")
+    scale_y_label = cmds.text(label="Y: 1.00")
+    scale_z_label = cmds.text(label="Z: 1.00")
+
+    def update_labels(*args):
+        for element in selected_elements:
+            # Get transform values for the element
+            transform_matrix = cmds.xform(element, query=True, matrix=True)
+            translate_x, translate_y, translate_z, rotate_x, rotate_y, rotate_z, scale_x, scale_y, scale_z = transform_matrix
+
+            # Update labels with live values
+            cmds.text(translate_x_label, edit=True, label=f"X: {translate_x:.2f}")
+            cmds.text(translate_y_label, edit=True, label=f"Y: {translate_y:.2f}")
+            cmds.text(translate_z_label, edit=True, label=f"Z: {translate_z:.2f}")
+            cmds.text(rotate_x_label, edit=True, label=f"X: {rotate_x:.2f}")
+            cmds.text(rotate_y_label, edit=True, label=f"Y: {rotate_y:.2f}")
+            cmds.text(rotate_z_label, edit=True, label=f"Z: {rotate_z:.2f}")
+            cmds.text(scale_x_label, edit=True, label=f"X: {scale_x:.2f}")
+            cmds.text(scale_y_label, edit=True, label=f"Y: {scale_y:.2f}")
+            cmds.text(scale_z_label, edit=True, label=f"Z: {scale_z:.2f}")
+
+    # Create a timer to update labels every 100 milliseconds
+    cmds.scriptJob(event=["SelectionChanged", update_labels], runOnce=False)
+
+    # Show the window
+    cmds.showWindow(window_name)
+
+# Call the function to create the UI
+create_transforms_ui()
